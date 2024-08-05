@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dti.iarefinamento.service.RefinamentoService;
 
+import reactor.core.publisher.Mono;
+
 @RestController
 @RequestMapping("/api/v1/refinamento")
 public class RefinamentoController {
@@ -18,7 +20,7 @@ public class RefinamentoController {
     }
 
     @PostMapping
-    public String getInsights(@RequestBody String transcricao) {
+    public Mono<String> getInsights(@RequestBody String transcricao) {
         return refinamentoService.gerarAnalise(transcricao);
     }
 }

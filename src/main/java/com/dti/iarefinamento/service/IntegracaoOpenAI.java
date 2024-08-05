@@ -1,9 +1,10 @@
 package com.dti.iarefinamento.service;
 
-import java.util.Optional;
+
+import reactor.core.publisher.Mono;
 
 public interface IntegracaoOpenAI {
 
-	Optional<String> getAnalisesTranscricao(String transcricao);
+	Mono<String> getAnalisesTranscricao(String transcricao);
 
 }

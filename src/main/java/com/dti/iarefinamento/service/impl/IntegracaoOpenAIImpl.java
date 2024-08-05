@@ -1,6 +1,8 @@
 package com.dti.iarefinamento.service.impl;
 
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -10,6 +12,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.dti.iarefinamento.service.IntegracaoOpenAI;
 
+import jakarta.annotation.PostConstruct;
+import reactor.core.publisher.Mono;
+
+//to do melhorar implementacao desta classe
 @Service
 public class IntegracaoOpenAIImpl implements IntegracaoOpenAI  {
 
@@ -19,22 +25,32 @@ public class IntegracaoOpenAIImpl implements IntegracaoOpenAI  {
 	@Value("${openai.api.base-url}")
 	private String openaiBaseUrl;
 
-	private final WebClient webClient;
+	private final WebClient.Builder webClientBuilder;
+	private WebClient webClient;
 
 	public IntegracaoOpenAIImpl(WebClient.Builder webClientBuilder) {
-		this.webClient = webClientBuilder.baseUrl(openaiBaseUrl)
-				.defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + openaiApiKey).build();
+		this.webClientBuilder = webClientBuilder;
 	}
+	
+    @PostConstruct
+    public void init() {
+        this.webClient = this.webClientBuilder.baseUrl(openaiBaseUrl)
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + openaiApiKey).build();
+    }
 
-	//to do melhorar implementacao deste metodo
+	
 	@Override
-	public Optional<String> getAnalisesTranscricao(String transcricao) {
-		String escapedTranscricao = transcricao.replace("\\", "\\\\").replace("\"", "\\\"");
-		String requestBody = String.format(
-				"{\"model\": \"gpt-3.5-turbo\", \"messages\": [{\"role\": \"user\", \"content\": \"%s\"}]}",
-				escapedTranscricao);
+	public Mono<String> getAnalisesTranscricao(String transcricao) {
+		Map<String, Object> requestBody = new HashMap<>();
+	    requestBody.put("model", "gpt-3.5-turbo");
+	    requestBody.put("messages", List.of(Map.of("role", "user", "content", transcricao)));
 
-		return Optional.ofNullable(webClient.post().uri("/v1/chat/completions").contentType(MediaType.APPLICATION_JSON)
-				.bodyValue(requestBody).retrieve().bodyToMono(String.class).block());
+		try {
+			return this.webClient.post().uri("/v1/chat/completions").contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(requestBody).retrieve().bodyToMono(String.class);
+		}catch(Exception e) {
+			String erro = e.getMessage();
+			return null;
+		}
 	}
 }

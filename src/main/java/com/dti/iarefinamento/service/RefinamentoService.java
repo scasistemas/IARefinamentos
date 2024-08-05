@@ -1,7 +1,9 @@
 package com.dti.iarefinamento.service;
 
+import reactor.core.publisher.Mono;
+
 public interface RefinamentoService {
 
-	String gerarAnalise(String transcricao);
+	Mono<String> gerarAnalise(String transcricao);
 
 }
