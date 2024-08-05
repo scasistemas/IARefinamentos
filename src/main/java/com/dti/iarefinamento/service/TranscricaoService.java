@@ -6,9 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import reactor.core.publisher.Mono;
 
-public interface IntegracaoOpenAI {
-
-	Mono<String> getAnalisesTranscricao(String transcricao);
+public interface TranscricaoService {
 
 	Mono<String> realizarTranscricao(MultipartFile file) throws IOException;
 
